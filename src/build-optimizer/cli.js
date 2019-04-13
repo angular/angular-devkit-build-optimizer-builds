@@ -1,6 +1,13 @@
 #!/usr/bin/env node
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * @license
+ * Copyright Google Inc. All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 const fs_1 = require("fs");
 const path_1 = require("path");
 const build_optimizer_1 = require("./build-optimizer");
