@@ -9,6 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 const ts = require("typescript");
 const ast_utils_1 = require("../helpers/ast-utils");
+/** @deprecated Since version 8 */
 function getFoldFileTransformer(program) {
     const checker = program.getTypeChecker();
     return (context) => {
