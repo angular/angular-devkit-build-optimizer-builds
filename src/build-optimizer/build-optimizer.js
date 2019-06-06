@@ -9,7 +9,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 const fs_1 = require("fs");
 const transform_javascript_1 = require("../helpers/transform-javascript");
-const class_fold_1 = require("../transforms/class-fold");
 const import_tslib_1 = require("../transforms/import-tslib");
 const prefix_classes_1 = require("../transforms/prefix-classes");
 const prefix_functions_1 = require("../transforms/prefix-functions");
@@ -86,12 +85,12 @@ function buildOptimizer(options) {
         // It will mark both `require()` calls and `console.log(stuff)` as pure.
         // We only apply it to whitelisted modules, since we know they are safe.
         // getPrefixFunctionsTransformer needs to be before getFoldFileTransformer.
-        prefix_functions_1.getPrefixFunctionsTransformer, selectedGetScrubFileTransformer, class_fold_1.getFoldFileTransformer);
+        prefix_functions_1.getPrefixFunctionsTransformer, selectedGetScrubFileTransformer);
         typeCheck = true;
     }
     else if (scrub_file_1.testScrubFile(content)) {
         // Always test as these require the type checker
-        getTransforms.push(selectedGetScrubFileTransformer, class_fold_1.getFoldFileTransformer);
+        getTransforms.push(selectedGetScrubFileTransformer);
         typeCheck = true;
     }
     // tests are not needed for fast path
