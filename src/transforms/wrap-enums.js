@@ -141,14 +141,11 @@ function visitBlockStatements(statements, context) {
             newStatement = createWrappedClass(currentStatement, classStatements);
             oIndex += classStatements.length - 1;
         }
-        if (newStatement && newStatement.length > 0) {
+        if (newStatement) {
             if (!updatedStatements) {
                 updatedStatements = [...statements];
             }
-            updatedStatements.splice(uIndex, oldStatementsLength, ...newStatement);
-            // When having more than a single new statement
-            // we need to update the update Index
-            uIndex += (newStatement ? newStatement.length - 1 : 0);
+            updatedStatements.splice(uIndex, oldStatementsLength, newStatement);
         }
         const result = ts.visitNode(currentStatement, visitor);
         if (result !== currentStatement) {
@@ -235,12 +232,7 @@ function findTs2_3EnumIife(name, statement) {
             return null;
         }
         const memberArgument = assignment.argumentExpression;
-        // String enum
-        if (ts.isStringLiteral(memberArgument)) {
-            return [callExpression, exportExpression];
-        }
-        // Non string enums
-        if (!ts.isBinaryExpression(memberArgument)
+        if (!memberArgument || !ts.isBinaryExpression(memberArgument)
             || memberArgument.operatorToken.kind !== ts.SyntaxKind.FirstAssignment) {
             return null;
         }
@@ -421,7 +413,7 @@ function updateEnumIife(hostNode, iife, exportAssignment) {
     if (exportAssignment) {
         value = ts.createBinary(exportAssignment, ts.SyntaxKind.FirstAssignment, updatedIife);
     }
-    return [updateHostNode(hostNode, value)];
+    return updateHostNode(hostNode, value);
 }
 function createWrappedEnum(name, hostNode, statements, literalInitializer = ts.createObjectLiteral(), addExportModifier = false) {
     const node = addExportModifier
@@ -436,7 +428,7 @@ function createWrappedEnum(name, hostNode, statements, literalInitializer = ts.c
         ...statements,
         innerReturn,
     ]);
-    return [updateHostNode(node, ast_utils_1.addPureComment(ts.createParen(iife)))];
+    return updateHostNode(node, ast_utils_1.addPureComment(ts.createParen(iife)));
 }
 function createWrappedClass(hostNode, statements) {
     const name = hostNode.name.text;
@@ -448,15 +440,7 @@ function createWrappedClass(hostNode, statements) {
         ...updatedStatements,
         ts.createReturn(ts.createIdentifier(name)),
     ]));
-    const modifiers = hostNode.modifiers;
-    const isDefault = !!modifiers
-        && modifiers.some(x => x.kind === ts.SyntaxKind.DefaultKeyword);
-    const newStatement = [];
-    newStatement.push(ts.createVariableStatement(isDefault ? undefined : modifiers, ts.createVariableDeclarationList([
+    return ts.createVariableStatement(hostNode.modifiers, ts.createVariableDeclarationList([
         ts.createVariableDeclaration(name, undefined, pureIife),
-    ], ts.NodeFlags.Const)));
-    if (isDefault) {
-        newStatement.push(ts.createExportAssignment(undefined, undefined, false, ts.createIdentifier(name)));
-    }
-    return newStatement;
+    ], ts.NodeFlags.Const));
 }
