@@ -232,7 +232,12 @@ function findTs2_3EnumIife(name, statement) {
             return null;
         }
         const memberArgument = assignment.argumentExpression;
-        if (!memberArgument || !ts.isBinaryExpression(memberArgument)
+        // String enum
+        if (ts.isStringLiteral(memberArgument)) {
+            return [callExpression, exportExpression];
+        }
+        // Non string enums
+        if (!ts.isBinaryExpression(memberArgument)
             || memberArgument.operatorToken.kind !== ts.SyntaxKind.FirstAssignment) {
             return null;
         }
