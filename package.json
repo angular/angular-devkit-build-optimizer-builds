@@ -1,6 +1,6 @@
 {
   "name": "@angular-devkit/build-optimizer",
-  "version": "0.801.0-rc.0+4.f9ae8ab",
+  "version": "0.801.0-rc.0+5.faa255a",
   "description": "Angular Build Optimizer",
   "experimental": true,
   "main": "src/index.js",
@@ -37,7 +37,6 @@
   "homepage": "https://github.com/angular/angular-cli",
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged",
       "pre-push": "node ./bin/devkit-admin hooks/pre-push"
     }
   }
