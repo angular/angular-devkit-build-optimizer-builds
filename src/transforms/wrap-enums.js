@@ -454,7 +454,7 @@ function createWrappedClass(hostNode, statements) {
     const newStatement = [];
     newStatement.push(ts.createVariableStatement(isDefault ? undefined : modifiers, ts.createVariableDeclarationList([
         ts.createVariableDeclaration(name, undefined, pureIife),
-    ], ts.NodeFlags.Const)));
+    ], ts.NodeFlags.Let)));
     if (isDefault) {
         newStatement.push(ts.createExportAssignment(undefined, undefined, false, ts.createIdentifier(name)));
     }
