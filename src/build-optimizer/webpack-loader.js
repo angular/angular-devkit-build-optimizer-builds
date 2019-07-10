@@ -10,8 +10,25 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const source_map_1 = require("source-map");
 const loaderUtils = require('loader-utils');
 const build_optimizer_1 = require("./build-optimizer");
+exports.buildOptimizerLoaderPath = __filename;
+const alwaysProcess = (path) => 
+// Always process TS files.
+path.endsWith('.ts') || path.endsWith('.tsx')
+    // Always process factory files.
+    || path.endsWith('.ngfactory.js') || path.endsWith('.ngstyle.js');
 function buildOptimizerLoader(content, previousSourceMap) {
     this.cacheable();
+    const skipBuildOptimizer = this._module
+        && this._module.factoryMeta
+        && this._module.factoryMeta.skipBuildOptimizer;
+    if (!alwaysProcess(this.resourcePath) && skipBuildOptimizer) {
+        // Skip loading processing this file with Build Optimizer if we determined in
+        // BuildOptimizerWebpackPlugin that we shouldn't.
+        // Webpack typings for previousSourceMap are wrong, they are JSON objects and not strings.
+        // tslint:disable-next-line:no-any
+        this.callback(null, content, previousSourceMap);
+        return;
+    }
     const options = loaderUtils.getOptions(this) || {};
     // Make up names of the intermediate files so we can chain the sourcemaps.
     const inputFilePath = this.resourcePath + '.pre-build-optimizer.js';
@@ -27,7 +44,6 @@ function buildOptimizerLoader(content, previousSourceMap) {
             && this._module.factoryMeta.sideEffectFree,
     });
     if (boOutput.emitSkipped || boOutput.content === null) {
-        // Webpack typings for previousSourceMap are wrong, they are JSON objects and not strings.
         // tslint:disable-next-line:no-any
         this.callback(null, content, previousSourceMap);
         return;
