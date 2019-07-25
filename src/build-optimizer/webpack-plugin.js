@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 class BuildOptimizerWebpackPlugin {
     apply(compiler) {
-        compiler.hooks.normalModuleFactory.tap('BuildOptimizerWebpackPlugin', nmf => {
-            nmf.hooks.module.tap('BuildOptimizerWebpackPlugin', (module, data) => {
+        compiler.hooks.normalModuleFactory.tap("BuildOptimizerWebpackPlugin", nmf => {
+            nmf.hooks.module.tap("BuildOptimizerWebpackPlugin", (module, data) => {
                 const resolveData = data.resourceResolveData;
                 if (resolveData && resolveData.descriptionFileData) {
                     // Only TS packages should use Build Optimizer.
