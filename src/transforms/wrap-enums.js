@@ -50,7 +50,7 @@ function visitBlockStatements(statements, context) {
             }
         }
         else {
-            return ts.visitEachChild(node, visitor, context);
+            return node;
         }
     };
     // 'oIndex' is the original statement index; 'uIndex' is the updated statement index
@@ -96,7 +96,7 @@ function visitBlockStatements(statements, context) {
                         // skip the export
                         oIndex++;
                     }
-                    const enumStatements = findStatements(name, statements, oIndex + 1);
+                    const enumStatements = findStatements(name, statements, oIndex, 1);
                     if (!enumStatements) {
                         continue;
                     }
@@ -233,7 +233,7 @@ function updateHostNode(hostNode, expression) {
  Foo = __decorate([]);
  ```
  */
-function findStatements(name, statements, statementIndex) {
+function findStatements(name, statements, statementIndex, offset = 0) {
     let count = 1;
     for (let index = statementIndex + 1; index < statements.length; ++index) {
         const statement = statements[index];
@@ -277,7 +277,7 @@ function findStatements(name, statements, statementIndex) {
         break;
     }
     if (count > 1) {
-        return statements.slice(statementIndex, statementIndex + count);
+        return statements.slice(statementIndex + offset, statementIndex + count);
     }
     return undefined;
 }
