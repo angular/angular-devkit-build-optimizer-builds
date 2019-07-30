@@ -106,7 +106,7 @@ function buildOptimizer(options) {
     if (!isWebpackBundle && (ignoreTest || import_tslib_1.testImportTslib(content))) {
         getTransforms.unshift(import_tslib_1.getImportTslibTransformer);
     }
-    getTransforms.unshift(wrap_enums_1.getWrapEnumsTransformer);
+    getTransforms.push(wrap_enums_1.getWrapEnumsTransformer);
     const transformJavascriptOpts = {
         content: content,
         inputFilePath: options.inputFilePath,
