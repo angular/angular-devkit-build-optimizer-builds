@@ -22,30 +22,6 @@ function testScrubFile(content) {
     return markers.some((marker) => content.indexOf(marker) !== -1);
 }
 exports.testScrubFile = testScrubFile;
-// Don't remove `ctorParameters` from these.
-const platformWhitelist = [
-    'PlatformRef_',
-    'TestabilityRegistry',
-    'Console',
-    'BrowserPlatformLocation',
-];
-const angularSpecifiers = [
-    // Class level decorators.
-    'Component',
-    'Directive',
-    'Injectable',
-    'NgModule',
-    'Pipe',
-    // Property level decorators.
-    'ContentChild',
-    'ContentChildren',
-    'HostBinding',
-    'HostListener',
-    'Input',
-    'Output',
-    'ViewChild',
-    'ViewChildren',
-];
 function getScrubFileTransformer(program) {
     return scrubFileTransformer(program.getTypeChecker(), false);
 }
@@ -80,8 +56,7 @@ function scrubFileTransformer(checker, isAngularCoreFile) {
                 if (isPropDecoratorAssignmentExpression(exprStmt)) {
                     nodes.push(...pickPropDecorationNodesToRemove(exprStmt, ngMetadata, checker));
                 }
-                if (isCtorParamsAssignmentExpression(exprStmt)
-                    && !isCtorParamsWhitelistedService(exprStmt)) {
+                if (isCtorParamsAssignmentExpression(exprStmt)) {
                     nodes.push(node);
                 }
             }
@@ -105,30 +80,17 @@ function expect(node, kind) {
     return node;
 }
 exports.expect = expect;
-function nameOfSpecifier(node) {
-    return node.name && node.name.text || '<unknown>';
-}
 function findAngularMetadata(node, isAngularCoreFile) {
-    let specs = [];
+    const specs = [];
     // Find all specifiers from imports of `@angular/core`.
     ts.forEachChild(node, (child) => {
         if (child.kind === ts.SyntaxKind.ImportDeclaration) {
             const importDecl = child;
             if (isAngularCoreImport(importDecl, isAngularCoreFile)) {
-                specs.push(...ast_utils_1.collectDeepNodes(node, ts.SyntaxKind.ImportSpecifier)
-                    .filter((spec) => isAngularCoreSpecifier(spec)));
+                specs.push(...ast_utils_1.collectDeepNodes(importDecl, ts.SyntaxKind.ImportSpecifier));
             }
         }
     });
-    // Check if the current module contains all know `@angular/core` specifiers.
-    // If it does, we assume it's a `@angular/core` FESM.
-    if (isAngularCoreFile) {
-        const localDecl = findAllDeclarations(node)
-            .filter((decl) => angularSpecifiers.indexOf(decl.name.text) !== -1);
-        if (localDecl.length === angularSpecifiers.length) {
-            specs = specs.concat(localDecl);
-        }
-    }
     return specs;
 }
 function findAllDeclarations(node) {
@@ -160,9 +122,6 @@ function isAngularCoreImport(node, isAngularCoreFile) {
         return true;
     }
     return false;
-}
-function isAngularCoreSpecifier(node) {
-    return angularSpecifiers.indexOf(nameOfSpecifier(node)) !== -1;
 }
 // Check if assignment is `Clazz.decorators = [...];`.
 function isDecoratorAssignmentExpression(exprStmt) {
@@ -320,12 +279,6 @@ function isCtorParamsAssignmentExpression(exprStmt) {
     }
     return true;
 }
-function isCtorParamsWhitelistedService(exprStmt) {
-    const expr = exprStmt.expression;
-    const propAccess = expr.left;
-    const serviceId = propAccess.expression;
-    return platformWhitelist.indexOf(serviceId.text) !== -1;
-}
 // Remove Angular decorators from`Clazz.decorators = [...];`, or expression itself if all are
 // removed.
 function pickDecorationNodesToRemove(exprStmt, ngMetadata, checker) {
@@ -342,7 +295,6 @@ function pickDecorationNodesToRemove(exprStmt, ngMetadata, checker) {
 // are removed.
 function pickDecorateNodesToRemove(exprStmt, tslibImports, ngMetadata, checker) {
     const expr = expect(exprStmt.expression, ts.SyntaxKind.BinaryExpression);
-    const classId = expect(expr.left, ts.SyntaxKind.Identifier);
     let callExpr;
     if (expr.right.kind === ts.SyntaxKind.CallExpression) {
         callExpr = expect(expr.right, ts.SyntaxKind.CallExpression);
@@ -366,40 +318,37 @@ function pickDecorateNodesToRemove(exprStmt, tslibImports, ngMetadata, checker) 
         const id = el.expression;
         return identifierIsMetadata(id, ngMetadata, checker);
     });
-    // Only remove constructor parameter metadata on non-whitelisted classes.
-    if (platformWhitelist.indexOf(classId.text) === -1) {
-        // Remove __metadata calls of type 'design:paramtypes'.
-        const metadataCalls = elements.filter((el) => {
-            if (!isTslibHelper(el, '__metadata', tslibImports, checker)) {
-                return false;
-            }
-            if (el.arguments.length < 2) {
-                return false;
-            }
-            if (el.arguments[0].kind !== ts.SyntaxKind.StringLiteral) {
-                return false;
-            }
-            const metadataTypeId = el.arguments[0];
-            if (metadataTypeId.text !== 'design:paramtypes') {
-                return false;
-            }
-            return true;
-        });
-        // Remove all __param calls.
-        const paramCalls = elements.filter((el) => {
-            if (!isTslibHelper(el, '__param', tslibImports, checker)) {
-                return false;
-            }
-            if (el.arguments.length != 2) {
-                return false;
-            }
-            if (el.arguments[0].kind !== ts.SyntaxKind.NumericLiteral) {
-                return false;
-            }
-            return true;
-        });
-        ngDecoratorCalls.push(...metadataCalls, ...paramCalls);
-    }
+    // Remove __metadata calls of type 'design:paramtypes'.
+    const metadataCalls = elements.filter((el) => {
+        if (!isTslibHelper(el, '__metadata', tslibImports, checker)) {
+            return false;
+        }
+        if (el.arguments.length < 2) {
+            return false;
+        }
+        if (el.arguments[0].kind !== ts.SyntaxKind.StringLiteral) {
+            return false;
+        }
+        const metadataTypeId = el.arguments[0];
+        if (metadataTypeId.text !== 'design:paramtypes') {
+            return false;
+        }
+        return true;
+    });
+    // Remove all __param calls.
+    const paramCalls = elements.filter((el) => {
+        if (!isTslibHelper(el, '__param', tslibImports, checker)) {
+            return false;
+        }
+        if (el.arguments.length != 2) {
+            return false;
+        }
+        if (el.arguments[0].kind !== ts.SyntaxKind.NumericLiteral) {
+            return false;
+        }
+        return true;
+    });
+    ngDecoratorCalls.push(...metadataCalls, ...paramCalls);
     // If all decorators are metadata decorators then return the whole `Class = __decorate([...])'`
     // statement so that it is removed in entirety
     return (elements.length === ngDecoratorCalls.length) ? [exprStmt] : ngDecoratorCalls;
