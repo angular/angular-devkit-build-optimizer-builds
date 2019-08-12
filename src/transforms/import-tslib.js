@@ -8,6 +8,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  * found in the LICENSE file at https://angular.io/license
  */
 const ts = require("typescript");
+const ast_utils_1 = require("../helpers/ast-utils");
 /**
  * @deprecated From 0.9.0
  */
@@ -28,7 +29,7 @@ function getImportTslibTransformer() {
                     const declarations = node.declarationList.declarations;
                     if (declarations.length === 1 && ts.isIdentifier(declarations[0].name)) {
                         const name = declarations[0].name.text;
-                        if (isHelperName(name)) {
+                        if (ast_utils_1.isHelperName(name)) {
                             // TODO: maybe add a few more checks, like checking the first part of the assignment.
                             const tslibImport = createTslibImport(name, useRequire);
                             tslibImports.push(tslibImport);
@@ -68,14 +69,4 @@ function createTslibImport(name, useRequire = false) {
         const newNode = ts.createImportDeclaration(undefined, undefined, importClause, ts.createLiteral('tslib'));
         return newNode;
     }
-}
-function isHelperName(name) {
-    // TODO: there are more helpers than these, should we replace them all?
-    const tsHelpers = [
-        '__extends',
-        '__decorate',
-        '__metadata',
-        '__param',
-    ];
-    return tsHelpers.indexOf(name) !== -1;
 }
