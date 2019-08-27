@@ -29,12 +29,8 @@ function getImportTslibTransformer() {
                     const declarations = node.declarationList.declarations;
                     if (declarations.length === 1 && ts.isIdentifier(declarations[0].name)) {
                         const name = declarations[0].name.text;
-                        // In FESM's when not using importHelpers there might be nultiple in the same file.
-                        // Example:
-                        // var __decorate$1 = '';
-                        // var __decorate$2 = '';
-                        const helperName = name.split(/\$\d+$/)[0];
-                        if (ast_utils_1.isHelperName(helperName)) {
+                        const helperName = ast_utils_1.getCleanHelperName(name);
+                        if (helperName) {
                             // TODO: maybe add a few more checks, like checking the first part of the assignment.
                             const alias = name === helperName ? undefined : name;
                             const tslibImport = createTslibImport(helperName, alias, useRequire);
