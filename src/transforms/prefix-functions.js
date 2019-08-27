@@ -66,7 +66,7 @@ function findTopLevelFunctions(parentNode) {
             }
             else if (ts.isCallExpression(innerNode)) {
                 let expression = innerNode.expression;
-                if (ts.isIdentifier(expression) && ast_utils_1.isHelperName(expression.text)) {
+                if (ts.isIdentifier(expression) && ast_utils_1.getCleanHelperName(expression.text)) {
                     return;
                 }
                 while (expression && ts.isParenthesizedExpression(expression)) {
