@@ -42,3 +42,21 @@ function isHelperName(name) {
     return tslibHelpers.has(name);
 }
 exports.isHelperName = isHelperName;
+/**
+ * In FESM's when not using `importHelpers` there might be multiple in the same file.
+  @example
+  ```
+  var __decorate$1 = '';
+  var __decorate$2 = '';
+  ```
+ * @returns Helper name without the '$' and number suffix or `undefined` if it's not a helper.
+ */
+function getCleanHelperName(name) {
+    const parts = name.split('$');
+    const cleanName = parts[0];
+    if (parts.length > 2 || (parts.length === 2 && isNaN(+parts[1]))) {
+        return undefined;
+    }
+    return isHelperName(cleanName) ? cleanName : undefined;
+}
+exports.getCleanHelperName = getCleanHelperName;
