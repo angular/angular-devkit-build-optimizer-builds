@@ -47,16 +47,14 @@ function scrubFileTransformer(checker, isAngularCoreFile) {
                 if (isDecoratorAssignmentExpression(exprStmt)) {
                     nodes.push(...pickDecorationNodesToRemove(exprStmt, ngMetadata, checker));
                 }
-                if (isDecorateAssignmentExpression(exprStmt, tslibImports, checker)) {
+                else if (isDecorateAssignmentExpression(exprStmt, tslibImports, checker)
+                    || isAngularDecoratorExpression(exprStmt, ngMetadata, tslibImports, checker)) {
                     nodes.push(...pickDecorateNodesToRemove(exprStmt, tslibImports, ngMetadata, checker));
                 }
-                if (isAngularDecoratorMetadataExpression(exprStmt, ngMetadata, tslibImports, checker)) {
-                    nodes.push(node);
-                }
-                if (isPropDecoratorAssignmentExpression(exprStmt)) {
+                else if (isPropDecoratorAssignmentExpression(exprStmt)) {
                     nodes.push(...pickPropDecorationNodesToRemove(exprStmt, ngMetadata, checker));
                 }
-                if (isCtorParamsAssignmentExpression(exprStmt)) {
+                else if (isCtorParamsAssignmentExpression(exprStmt)) {
                     nodes.push(node);
                 }
             }
@@ -199,7 +197,7 @@ function isDecorateAssignmentExpression(exprStmt, tslibImports, checker) {
     return true;
 }
 // Check if expression is `__decorate([smt, __metadata("design:type", Object)], ...)`.
-function isAngularDecoratorMetadataExpression(exprStmt, ngMetadata, tslibImports, checker) {
+function isAngularDecoratorExpression(exprStmt, ngMetadata, tslibImports, checker) {
     if (exprStmt.expression.kind !== ts.SyntaxKind.CallExpression) {
         return false;
     }
@@ -215,26 +213,16 @@ function isAngularDecoratorMetadataExpression(exprStmt, ngMetadata, tslibImports
     }
     const decorateArray = callExpr.arguments[0];
     // Check first array entry for Angular decorators.
-    if (decorateArray.elements[0].kind !== ts.SyntaxKind.CallExpression) {
+    if (decorateArray.elements.length === 0 || !ts.isCallExpression(decorateArray.elements[0])) {
         return false;
     }
-    const decoratorCall = decorateArray.elements[0];
-    if (decoratorCall.expression.kind !== ts.SyntaxKind.Identifier) {
-        return false;
-    }
-    const decoratorId = decoratorCall.expression;
-    if (!identifierIsMetadata(decoratorId, ngMetadata, checker)) {
-        return false;
-    }
-    // Check second array entry for __metadata call.
-    if (decorateArray.elements[1].kind !== ts.SyntaxKind.CallExpression) {
-        return false;
-    }
-    const metadataCall = decorateArray.elements[1];
-    if (!isTslibHelper(metadataCall, '__metadata', tslibImports, checker)) {
-        return false;
-    }
-    return true;
+    return decorateArray.elements.some(decoratorCall => {
+        if (!ts.isCallExpression(decoratorCall) || !ts.isIdentifier(decoratorCall.expression)) {
+            return false;
+        }
+        const decoratorId = decoratorCall.expression;
+        return identifierIsMetadata(decoratorId, ngMetadata, checker);
+    });
 }
 // Check if assignment is `Clazz.propDecorators = [...];`.
 function isPropDecoratorAssignmentExpression(exprStmt) {
@@ -300,16 +288,20 @@ function pickDecorationNodesToRemove(exprStmt, ngMetadata, checker) {
 // Remove Angular decorators from `Clazz = __decorate([...], Clazz)`, or expression itself if all
 // are removed.
 function pickDecorateNodesToRemove(exprStmt, tslibImports, ngMetadata, checker) {
-    const expr = expect(exprStmt.expression, ts.SyntaxKind.BinaryExpression);
     let callExpr;
-    if (expr.right.kind === ts.SyntaxKind.CallExpression) {
-        callExpr = expect(expr.right, ts.SyntaxKind.CallExpression);
+    if (ts.isCallExpression(exprStmt.expression)) {
+        callExpr = exprStmt.expression;
     }
-    else if (expr.right.kind === ts.SyntaxKind.BinaryExpression) {
-        const innerExpr = expr.right;
-        callExpr = expect(innerExpr.right, ts.SyntaxKind.CallExpression);
+    else if (ts.isBinaryExpression(exprStmt.expression)) {
+        const expr = exprStmt.expression;
+        if (ts.isCallExpression(expr.right)) {
+            callExpr = expr.right;
+        }
+        else if (ts.isBinaryExpression(expr.right) && ts.isCallExpression(expr.right.right)) {
+            callExpr = expr.right.right;
+        }
     }
-    else {
+    if (!callExpr) {
         return [];
     }
     const arrLiteral = expect(callExpr.arguments[0], ts.SyntaxKind.ArrayLiteralExpression);
@@ -333,10 +325,6 @@ function pickDecorateNodesToRemove(exprStmt, tslibImports, ngMetadata, checker) 
             return false;
         }
         if (el.arguments[0].kind !== ts.SyntaxKind.StringLiteral) {
-            return false;
-        }
-        const metadataTypeId = el.arguments[0];
-        if (metadataTypeId.text !== 'design:paramtypes') {
             return false;
         }
         return true;
