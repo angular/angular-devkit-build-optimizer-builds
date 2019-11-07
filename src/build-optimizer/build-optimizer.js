@@ -9,8 +9,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 const fs_1 = require("fs");
 const transform_javascript_1 = require("../helpers/transform-javascript");
-const class_fold_1 = require("../transforms/class-fold");
-const import_tslib_1 = require("../transforms/import-tslib");
 const prefix_classes_1 = require("../transforms/prefix-classes");
 const prefix_functions_1 = require("../transforms/prefix-functions");
 const scrub_file_1 = require("../transforms/scrub-file");
@@ -76,7 +74,6 @@ function buildOptimizer(options) {
         (isAngularCoreFile === undefined && originalFilePath && isKnownCoreFile(originalFilePath))) {
         selectedGetScrubFileTransformer = scrub_file_1.getScrubFileTransformerForCore;
     }
-    const isWebpackBundle = content.indexOf('__webpack_require__') !== -1;
     // Determine which transforms to apply.
     const getTransforms = [];
     let typeCheck = false;
@@ -86,28 +83,18 @@ function buildOptimizer(options) {
         // It will mark both `require()` calls and `console.log(stuff)` as pure.
         // We only apply it to whitelisted modules, since we know they are safe.
         // getPrefixFunctionsTransformer needs to be before getFoldFileTransformer.
-        prefix_functions_1.getPrefixFunctionsTransformer, selectedGetScrubFileTransformer, class_fold_1.getFoldFileTransformer);
+        prefix_functions_1.getPrefixFunctionsTransformer, selectedGetScrubFileTransformer);
         typeCheck = true;
     }
     else if (scrub_file_1.testScrubFile(content)) {
         // Always test as these require the type checker
-        getTransforms.push(selectedGetScrubFileTransformer, class_fold_1.getFoldFileTransformer);
+        getTransforms.push(selectedGetScrubFileTransformer);
         typeCheck = true;
     }
-    // tests are not needed for fast path
-    // usage will be expanded once transformers are verified safe
-    const ignoreTest = !options.emitSourceMap && !typeCheck;
     if (prefix_classes_1.testPrefixClasses(content)) {
         getTransforms.unshift(prefix_classes_1.getPrefixClassesTransformer);
     }
-    // This transform introduces import/require() calls, but this won't work properly on libraries
-    // built with Webpack. These libraries use __webpack_require__() calls instead, which will break
-    // with a new import that wasn't part of it's original module list.
-    // We ignore this transform for such libraries.
-    if (!isWebpackBundle && (ignoreTest || import_tslib_1.testImportTslib(content))) {
-        getTransforms.unshift(import_tslib_1.getImportTslibTransformer);
-    }
-    getTransforms.unshift(wrap_enums_1.getWrapEnumsTransformer);
+    getTransforms.push(wrap_enums_1.getWrapEnumsTransformer);
     const transformJavascriptOpts = {
         content: content,
         inputFilePath: options.inputFilePath,

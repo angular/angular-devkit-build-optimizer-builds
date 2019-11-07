@@ -5,6 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import * as ts from 'typescript';
-/** @deprecated Since version 8 */
-export declare function getFoldFileTransformer(program: ts.Program): ts.TransformerFactory<ts.SourceFile>;
+import { Compiler } from 'webpack';
+export declare class BuildOptimizerWebpackPlugin {
+    apply(compiler: Compiler): void;
+}
