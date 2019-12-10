@@ -19,7 +19,6 @@ function testScrubFile(content) {
         'propDecorators',
         'ctorParameters',
         'ɵsetClassMetadata',
-        'ɵɵsetNgModuleScope',
     ];
     return markers.some((marker) => content.indexOf(marker) !== -1);
 }
@@ -259,7 +258,30 @@ function isAssignmentExpressionTo(exprStmt, name) {
     return true;
 }
 function isIvyPrivateCallExpression(exprStmt) {
-    const callExpr = exprStmt.expression;
+    // Each Ivy private call expression is inside an IIFE as single statements, so we must go down it.
+    const expression = exprStmt.expression;
+    if (!expression || !ts.isCallExpression(expression) || expression.arguments.length !== 0) {
+        return null;
+    }
+    const parenExpr = expression;
+    if (!ts.isParenthesizedExpression(parenExpr.expression)) {
+        return null;
+    }
+    const funExpr = parenExpr.expression.expression;
+    if (!ts.isFunctionExpression(funExpr)) {
+        return null;
+    }
+    const innerStmts = funExpr.body.statements;
+    if (innerStmts.length !== 1) {
+        return null;
+    }
+    const innerExprStmt = innerStmts[0];
+    if (!ts.isExpressionStatement(innerExprStmt)) {
+        return null;
+    }
+    // Now we're in the IIFE and have the inner expression statement. We can check if it matches
+    // a private Ivy call.
+    const callExpr = innerExprStmt.expression;
     if (!ts.isCallExpression(callExpr)) {
         return false;
     }
@@ -267,8 +289,7 @@ function isIvyPrivateCallExpression(exprStmt) {
     if (!ts.isPropertyAccessExpression(propAccExpr)) {
         return false;
     }
-    if (propAccExpr.name.text != 'ɵsetClassMetadata'
-        && propAccExpr.name.text != 'ɵɵsetNgModuleScope') {
+    if (propAccExpr.name.text != 'ɵsetClassMetadata') {
         return false;
     }
     return true;
