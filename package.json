@@ -1,6 +1,6 @@
 {
   "name": "@angular-devkit/build-optimizer",
-  "version": "0.900.0-rc.8+7.db6dd3d",
+  "version": "0.900.0-rc.9+11.acdd7d0",
   "description": "Angular Build Optimizer",
   "experimental": true,
   "main": "src/index.js",
@@ -29,7 +29,6 @@
   "engines": {
     "node": ">= 10.13.0",
     "npm": ">= 6.11.0",
-    "pnpm": ">= 3.2.0",
     "yarn": ">= 1.13.0"
   },
   "author": "Angular Authors",
