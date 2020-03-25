@@ -1,6 +1,6 @@
 {
   "name": "@angular-devkit/build-optimizer",
-  "version": "0.900.7+1.7bdb2b8",
+  "version": "0.900.7+2.9e950e4",
   "description": "Angular Build Optimizer",
   "experimental": true,
   "main": "src/index.js",
