@@ -9,9 +9,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 const ts = require("typescript");
 const ast_utils_1 = require("../helpers/ast-utils");
-/**
- * @deprecated From 0.9.0
- */
 function testScrubFile(content) {
     const markers = [
         'decorators',
