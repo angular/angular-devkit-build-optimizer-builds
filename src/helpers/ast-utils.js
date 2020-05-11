@@ -8,7 +8,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  * found in the LICENSE file at https://angular.io/license
  */
 const tslib = require("tslib");
-const ts = require("typescript");
+const ts = require("../../third_party/github.com/Microsoft/TypeScript/lib/typescript");
 const pureFunctionComment = '@__PURE__';
 // We include only exports that start with '__' because tslib helpers
 // all start with a suffix of two underscores.

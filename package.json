@@ -1,6 +1,6 @@
 {
   "name": "@angular-devkit/build-optimizer",
-  "version": "0.1000.0-next.4+2.6efa948",
+  "version": "0.1000.0-next.4+9.71fd298",
   "description": "Angular Build Optimizer",
   "experimental": true,
   "main": "src/index.js",
@@ -11,8 +11,7 @@
   "dependencies": {
     "loader-utils": "2.0.0",
     "source-map": "0.7.3",
-    "tslib": "1.11.1",
-    "typescript": "3.6.5",
+    "tslib": "1.11.2",
     "webpack-sources": "1.4.3"
   },
   "keywords": [
