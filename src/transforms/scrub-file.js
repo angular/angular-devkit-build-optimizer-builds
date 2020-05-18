@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.expect = exports.getScrubFileTransformerForCore = exports.getScrubFileTransformer = exports.testScrubFile = void 0;
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
