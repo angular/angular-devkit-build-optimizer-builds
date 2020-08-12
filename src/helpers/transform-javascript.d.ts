@@ -7,6 +7,7 @@
  */
 import { RawSourceMap } from 'source-map';
 import * as ts from '../../third_party/github.com/Microsoft/TypeScript/lib/typescript';
+export declare type TransformerFactoryCreator = (program?: ts.Program) => ts.TransformerFactory<ts.SourceFile>;
 export interface TransformJavascriptOptions {
     content: string;
     inputFilePath?: string;
@@ -14,7 +15,7 @@ export interface TransformJavascriptOptions {
     emitSourceMap?: boolean;
     strict?: boolean;
     typeCheck?: boolean;
-    getTransforms: Array<(program?: ts.Program) => ts.TransformerFactory<ts.SourceFile>>;
+    getTransforms: TransformerFactoryCreator[];
 }
 export interface TransformJavascriptOutput {
     content: string | null;

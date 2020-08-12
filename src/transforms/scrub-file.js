@@ -22,14 +22,18 @@ function testScrubFile(content) {
 }
 exports.testScrubFile = testScrubFile;
 function getScrubFileTransformer(program) {
-    return scrubFileTransformer(program.getTypeChecker(), false);
+    return scrubFileTransformer(program, false);
 }
 exports.getScrubFileTransformer = getScrubFileTransformer;
 function getScrubFileTransformerForCore(program) {
-    return scrubFileTransformer(program.getTypeChecker(), true);
+    return scrubFileTransformer(program, true);
 }
 exports.getScrubFileTransformerForCore = getScrubFileTransformerForCore;
-function scrubFileTransformer(checker, isAngularCoreFile) {
+function scrubFileTransformer(program, isAngularCoreFile) {
+    if (!program) {
+        throw new Error('scrubFileTransformer requires a TypeScript Program.');
+    }
+    const checker = program.getTypeChecker();
     return (context) => {
         const transformer = (sf) => {
             const ngMetadata = findAngularMetadata(sf, isAngularCoreFile);

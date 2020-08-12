@@ -60,7 +60,8 @@ function transformJavascript(options) {
                 emitSkipped: true,
             };
         }
-        const transforms = getTransforms.map((getTf) => getTf(undefined));
+        // All fast path transformers do not use a program
+        const transforms = getTransforms.map((getTf) => getTf(/* program */ undefined));
         const result = ts.transform(tempSourceFile, transforms, tsOptions);
         if (result.transformed.length === 0 || result.transformed[0] === tempSourceFile) {
             return {

@@ -7,6 +7,6 @@
  */
 import * as ts from '../../third_party/github.com/Microsoft/TypeScript/lib/typescript';
 export declare function testScrubFile(content: string): boolean;
-export declare function getScrubFileTransformer(program: ts.Program): ts.TransformerFactory<ts.SourceFile>;
-export declare function getScrubFileTransformerForCore(program: ts.Program): ts.TransformerFactory<ts.SourceFile>;
+export declare function getScrubFileTransformer(program?: ts.Program): ts.TransformerFactory<ts.SourceFile>;
+export declare function getScrubFileTransformerForCore(program?: ts.Program): ts.TransformerFactory<ts.SourceFile>;
 export declare function expect<T extends ts.Node>(node: ts.Node, kind: ts.SyntaxKind): T;
