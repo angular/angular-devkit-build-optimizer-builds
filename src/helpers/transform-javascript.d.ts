@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 import { RawSourceMap } from 'source-map';
-import * as ts from '../../third_party/github.com/Microsoft/TypeScript/lib/typescript';
+import * as ts from 'typescript';
 export declare type TransformerFactoryCreator = (program?: ts.Program) => ts.TransformerFactory<ts.SourceFile>;
 export interface TransformJavascriptOptions {
     content: string;

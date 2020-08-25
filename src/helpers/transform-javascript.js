@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.transformJavascript = void 0;
-const ts = require("../../third_party/github.com/Microsoft/TypeScript/lib/typescript");
+const ts = require("typescript");
 function validateDiagnostics(diagnostics, strict) {
     // Print error diagnostics.
     const hasError = diagnostics.some(diag => diag.category === ts.DiagnosticCategory.Error);
