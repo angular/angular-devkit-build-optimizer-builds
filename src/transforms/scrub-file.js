@@ -41,15 +41,12 @@ function scrubFileTransformer(program, isAngularCoreFile) {
             const nodes = [];
             ts.forEachChild(sf, checkNodeForDecorators);
             function checkNodeForDecorators(node) {
-                if (node.kind !== ts.SyntaxKind.ExpressionStatement) {
-                    // TS 2.4 nests decorators inside downleveled class IIFEs, so we
-                    // must recurse into them to find the relevant expression statements.
+                if (!ts.isExpressionStatement(node)) {
                     return ts.forEachChild(node, checkNodeForDecorators);
                 }
                 const exprStmt = node;
                 // Do checks that don't need the typechecker first and bail early.
-                if (isIvyPrivateCallExpression(exprStmt)
-                    || isCtorParamsAssignmentExpression(exprStmt)) {
+                if (isIvyPrivateCallExpression(exprStmt) || isCtorParamsAssignmentExpression(exprStmt)) {
                     nodes.push(node);
                 }
                 else if (isDecoratorAssignmentExpression(exprStmt)) {
@@ -300,7 +297,7 @@ function isIvyPrivateCallExpression(exprStmt) {
 function pickDecorationNodesToRemove(exprStmt, ngMetadata, checker) {
     const expr = expect(exprStmt.expression, ts.SyntaxKind.BinaryExpression);
     const literal = expect(expr.right, ts.SyntaxKind.ArrayLiteralExpression);
-    if (!literal.elements.every((elem) => elem.kind === ts.SyntaxKind.ObjectLiteralExpression)) {
+    if (!literal.elements.every(elem => ts.isObjectLiteralExpression(elem))) {
         return [];
     }
     const elements = literal.elements;
@@ -367,8 +364,8 @@ function pickDecorateNodesToRemove(exprStmt, tslibImports, ngMetadata, checker) 
 function pickPropDecorationNodesToRemove(exprStmt, ngMetadata, checker) {
     const expr = expect(exprStmt.expression, ts.SyntaxKind.BinaryExpression);
     const literal = expect(expr.right, ts.SyntaxKind.ObjectLiteralExpression);
-    if (!literal.properties.every((elem) => elem.kind === ts.SyntaxKind.PropertyAssignment &&
-        elem.initializer.kind === ts.SyntaxKind.ArrayLiteralExpression)) {
+    if (!literal.properties.every(elem => ts.isPropertyAssignment(elem)
+        && ts.isArrayLiteralExpression(elem.initializer))) {
         return [];
     }
     const assignments = literal.properties;
@@ -393,8 +390,7 @@ function pickPropDecorationNodesToRemove(exprStmt, ngMetadata, checker) {
     // If every node to be removed is a property assignment (full property's decorators) and
     // all properties are accounted for, remove the whole assignment. Otherwise, remove the
     // nodes which were marked as safe.
-    if (toRemove.length === assignments.length &&
-        toRemove.every((node) => node.kind === ts.SyntaxKind.PropertyAssignment)) {
+    if (toRemove.length === assignments.length && toRemove.every((node) => ts.isPropertyAssignment(node))) {
         return [exprStmt];
     }
     return toRemove;
