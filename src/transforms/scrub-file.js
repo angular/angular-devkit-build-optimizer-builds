@@ -124,7 +124,7 @@ function isAngularCoreImport(node, isAngularCoreFile) {
         return true;
     }
     // Relative imports from a Angular core file are also core imports.
-    if (isAngularCoreFile && importText.startsWith('.')) {
+    if (isAngularCoreFile && (importText.startsWith('./') || importText.startsWith('../'))) {
         return true;
     }
     return false;
@@ -452,13 +452,11 @@ function isTslibHelper(callExpr, helper, tslibImports, checker) {
     if (!((_a = symbol === null || symbol === void 0 ? void 0 : symbol.declarations) === null || _a === void 0 ? void 0 : _a.length)) {
         return false;
     }
-    for (const dec of symbol.declarations) {
-        if (ts.isImportSpecifier(dec) && tslibImports.some(name => name.elements.includes(dec))) {
-            return true;
-        }
-        // Handle inline helpers `var __decorate = (this...`
-        if (ts.isVariableDeclaration(dec)) {
-            return true;
+    for (const name of tslibImports) {
+        for (const dec of symbol.declarations) {
+            if (ts.isImportSpecifier(dec) && name.elements.includes(dec)) {
+                return true;
+            }
         }
     }
     return false;
