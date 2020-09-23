@@ -15,7 +15,7 @@ const prefix_functions_1 = require("../transforms/prefix-functions");
 const scrub_file_1 = require("../transforms/scrub-file");
 const wrap_enums_1 = require("../transforms/wrap-enums");
 // Angular packages are known to have no side effects.
-const whitelistedAngularModules = [
+const knownSideEffectFreeAngularModules = [
     /[\\/]node_modules[\\/]@angular[\\/]animations[\\/]/,
     /[\\/]node_modules[\\/]@angular[\\/]common[\\/]/,
     /[\\/]node_modules[\\/]@angular[\\/]compiler[\\/]/,
@@ -49,7 +49,7 @@ function isKnownCoreFile(filePath) {
 }
 function isKnownSideEffectFree(filePath) {
     return ngFactories.some((re) => re.test(filePath)) ||
-        whitelistedAngularModules.some((re) => re.test(filePath));
+        knownSideEffectFreeAngularModules.some((re) => re.test(filePath));
 }
 function buildOptimizer(options) {
     const { inputFilePath, isAngularCoreFile } = options;
@@ -82,7 +82,7 @@ function buildOptimizer(options) {
         getTransforms.push(
         // getPrefixFunctionsTransformer is rather dangerous, apply only to known pure es5 modules.
         // It will mark both `require()` calls and `console.log(stuff)` as pure.
-        // We only apply it to whitelisted modules, since we know they are safe.
+        // We only apply it to modules known to be side effect free, since we know they are safe.
         // getPrefixFunctionsTransformer needs to be before getFoldFileTransformer.
         prefix_functions_1.getPrefixFunctionsTransformer, selectedGetScrubFileTransformer);
         typeCheck = true;
