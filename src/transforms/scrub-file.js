@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.expect = exports.createScrubFileTransformerFactory = exports.testScrubFile = void 0;
+exports.expect = exports.getScrubFileTransformerForCore = exports.getScrubFileTransformer = exports.testScrubFile = void 0;
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -21,10 +21,14 @@ function testScrubFile(content) {
     return markers.some((marker) => content.includes(marker));
 }
 exports.testScrubFile = testScrubFile;
-function createScrubFileTransformerFactory(isAngularCoreFile) {
-    return (program) => scrubFileTransformer(program, isAngularCoreFile);
+function getScrubFileTransformer(program) {
+    return scrubFileTransformer(program, false);
 }
-exports.createScrubFileTransformerFactory = createScrubFileTransformerFactory;
+exports.getScrubFileTransformer = getScrubFileTransformer;
+function getScrubFileTransformerForCore(program) {
+    return scrubFileTransformer(program, true);
+}
+exports.getScrubFileTransformerForCore = getScrubFileTransformerForCore;
 function scrubFileTransformer(program, isAngularCoreFile) {
     if (!program) {
         throw new Error('scrubFileTransformer requires a TypeScript Program.');
@@ -350,15 +354,10 @@ function pickDecorateNodesToRemove(exprStmt, tslibImports, ngMetadata, checker) 
         }
         return true;
     });
-    if (ngDecoratorCalls.length === 0) {
-        return [];
-    }
-    const callCount = ngDecoratorCalls.length + metadataCalls.length + paramCalls.length;
+    ngDecoratorCalls.push(...metadataCalls, ...paramCalls);
     // If all decorators are metadata decorators then return the whole `Class = __decorate([...])'`
-    // statement so that it is removed in entirety.
-    // If not then only remove the Angular decorators.
-    // The metadata and param calls may be used by the non-Angular decorators.
-    return (elements.length === callCount) ? [exprStmt] : ngDecoratorCalls;
+    // statement so that it is removed in entirety
+    return (elements.length === ngDecoratorCalls.length) ? [exprStmt] : ngDecoratorCalls;
 }
 // Remove Angular decorators from`Clazz.propDecorators = [...];`, or expression itself if all
 // are removed.
