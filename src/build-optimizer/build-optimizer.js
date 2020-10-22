@@ -32,22 +32,28 @@ const knownSideEffectFreeAngularModules = [
     /[\\/]node_modules[\\/]@angular[\\/]cdk[\\/]/,
 ];
 // Factories created by AOT are known to have no side effects.
+// In Angular 2/4 the file path for factories can be `.ts`, but in Angular 5 it is `.js`.
 const ngFactories = [
-    '.ngfactory.js',
-    '.ngstyle.js',
+    /\.ngfactory\.[jt]s/,
+    /\.ngstyle\.[jt]s/,
 ];
 // Known locations for the source files of @angular/core.
-const coreFilesRegex = /[\\/]node_modules[\\/]@angular[\\/]core[\\/][f]?esm2015[\\/]/;
+const coreFilesRegex = [
+    /[\\/]node_modules[\\/]@angular[\\/]core[\\/]esm5[\\/]/,
+    /[\\/]node_modules[\\/]@angular[\\/]core[\\/]fesm5[\\/]/,
+    /[\\/]node_modules[\\/]@angular[\\/]core[\\/]esm2015[\\/]/,
+    /[\\/]node_modules[\\/]@angular[\\/]core[\\/]fesm2015[\\/]/,
+];
 function isKnownCoreFile(filePath) {
-    return coreFilesRegex.test(filePath);
+    return coreFilesRegex.some(re => re.test(filePath));
 }
 function isKnownSideEffectFree(filePath) {
-    return ngFactories.some((s) => filePath.endsWith(s)) ||
+    return ngFactories.some((re) => re.test(filePath)) ||
         knownSideEffectFreeAngularModules.some((re) => re.test(filePath));
 }
 function buildOptimizer(options) {
-    const { inputFilePath } = options;
-    let { originalFilePath, content, isAngularCoreFile } = options;
+    const { inputFilePath, isAngularCoreFile } = options;
+    let { originalFilePath, content } = options;
     if (!originalFilePath && inputFilePath) {
         originalFilePath = inputFilePath;
     }
@@ -64,30 +70,30 @@ function buildOptimizer(options) {
             emitSkipped: true,
         };
     }
-    if (isAngularCoreFile === undefined) {
-        isAngularCoreFile = !!originalFilePath && isKnownCoreFile(originalFilePath);
+    let selectedGetScrubFileTransformer = scrub_file_1.getScrubFileTransformer;
+    if (isAngularCoreFile === true ||
+        (isAngularCoreFile === undefined && originalFilePath && isKnownCoreFile(originalFilePath))) {
+        selectedGetScrubFileTransformer = scrub_file_1.getScrubFileTransformerForCore;
     }
-    const hasSafeSideEffects = originalFilePath && isKnownSideEffectFree(originalFilePath);
     // Determine which transforms to apply.
     const getTransforms = [];
     let typeCheck = false;
-    if (hasSafeSideEffects) {
-        // Angular modules have known safe side effects
+    if (options.isSideEffectFree || originalFilePath && isKnownSideEffectFree(originalFilePath)) {
         getTransforms.push(
         // getPrefixFunctionsTransformer is rather dangerous, apply only to known pure es5 modules.
         // It will mark both `require()` calls and `console.log(stuff)` as pure.
         // We only apply it to modules known to be side effect free, since we know they are safe.
-        prefix_functions_1.getPrefixFunctionsTransformer);
+        // getPrefixFunctionsTransformer needs to be before getFoldFileTransformer.
+        prefix_functions_1.getPrefixFunctionsTransformer, selectedGetScrubFileTransformer);
         typeCheck = true;
     }
-    else if (prefix_classes_1.testPrefixClasses(content)) {
-        // This is only relevant if prefix functions is not used since prefix functions will prefix IIFE wrapped classes.
-        getTransforms.unshift(prefix_classes_1.getPrefixClassesTransformer);
-    }
-    if (scrub_file_1.testScrubFile(content)) {
+    else if (scrub_file_1.testScrubFile(content)) {
         // Always test as these require the type checker
-        getTransforms.push(scrub_file_1.createScrubFileTransformerFactory(isAngularCoreFile));
+        getTransforms.push(selectedGetScrubFileTransformer);
         typeCheck = true;
+    }
+    if (prefix_classes_1.testPrefixClasses(content)) {
+        getTransforms.unshift(prefix_classes_1.getPrefixClassesTransformer);
     }
     getTransforms.push(wrap_enums_1.getWrapEnumsTransformer);
     const transformJavascriptOpts = {

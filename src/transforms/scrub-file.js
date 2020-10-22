@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.expect = exports.createScrubFileTransformerFactory = exports.testScrubFile = void 0;
+exports.expect = exports.getScrubFileTransformerForCore = exports.getScrubFileTransformer = exports.testScrubFile = void 0;
 /**
  * @license
  * Copyright Google Inc. All Rights Reserved.
@@ -21,10 +21,14 @@ function testScrubFile(content) {
     return markers.some((marker) => content.includes(marker));
 }
 exports.testScrubFile = testScrubFile;
-function createScrubFileTransformerFactory(isAngularCoreFile) {
-    return (program) => scrubFileTransformer(program, isAngularCoreFile);
+function getScrubFileTransformer(program) {
+    return scrubFileTransformer(program, false);
 }
-exports.createScrubFileTransformerFactory = createScrubFileTransformerFactory;
+exports.getScrubFileTransformer = getScrubFileTransformer;
+function getScrubFileTransformerForCore(program) {
+    return scrubFileTransformer(program, true);
+}
+exports.getScrubFileTransformerForCore = getScrubFileTransformerForCore;
 function scrubFileTransformer(program, isAngularCoreFile) {
     if (!program) {
         throw new Error('scrubFileTransformer requires a TypeScript Program.');
@@ -37,29 +41,22 @@ function scrubFileTransformer(program, isAngularCoreFile) {
             const nodes = [];
             ts.forEachChild(sf, checkNodeForDecorators);
             function checkNodeForDecorators(node) {
-                var _a;
-                if (!ts.isExpressionStatement(node)) {
+                if (node.kind !== ts.SyntaxKind.ExpressionStatement) {
+                    // TS 2.4 nests decorators inside downleveled class IIFEs, so we
+                    // must recurse into them to find the relevant expression statements.
                     return ts.forEachChild(node, checkNodeForDecorators);
                 }
                 const exprStmt = node;
-                const iife = (_a = getIifeStatement(exprStmt)) === null || _a === void 0 ? void 0 : _a.expression;
                 // Do checks that don't need the typechecker first and bail early.
-                if (isCtorParamsAssignmentExpression(exprStmt)) {
-                    nodes.push(node);
-                }
-                else if (iife && isIvyPrivateCallExpression(iife, 'ɵsetClassMetadata')) {
-                    nodes.push(node);
-                }
-                else if (iife &&
-                    ts.isBinaryExpression(iife) &&
-                    isIvyPrivateCallExpression(iife.right, 'ɵsetClassMetadata')) {
+                if (isIvyPrivateCallExpression(exprStmt)
+                    || isCtorParamsAssignmentExpression(exprStmt)) {
                     nodes.push(node);
                 }
                 else if (isDecoratorAssignmentExpression(exprStmt)) {
                     nodes.push(...pickDecorationNodesToRemove(exprStmt, ngMetadata, checker));
                 }
-                else if (isDecorateAssignmentExpression(exprStmt, tslibImports, checker) ||
-                    isAngularDecoratorExpression(exprStmt, ngMetadata, tslibImports, checker)) {
+                else if (isDecorateAssignmentExpression(exprStmt, tslibImports, checker)
+                    || isAngularDecoratorExpression(exprStmt, ngMetadata, tslibImports, checker)) {
                     nodes.push(...pickDecorateNodesToRemove(exprStmt, tslibImports, ngMetadata, checker));
                 }
                 else if (isPropDecoratorAssignmentExpression(exprStmt)) {
@@ -261,8 +258,8 @@ function isAssignmentExpressionTo(exprStmt, name) {
     }
     return true;
 }
-// Each Ivy private call expression is inside an IIFE
-function getIifeStatement(exprStmt) {
+function isIvyPrivateCallExpression(exprStmt) {
+    // Each Ivy private call expression is inside an IIFE as single statements, so we must go down it.
     const expression = exprStmt.expression;
     if (!expression || !ts.isCallExpression(expression) || expression.arguments.length !== 0) {
         return null;
@@ -283,19 +280,17 @@ function getIifeStatement(exprStmt) {
     if (!ts.isExpressionStatement(innerExprStmt)) {
         return null;
     }
-    return innerExprStmt;
-}
-function isIvyPrivateCallExpression(expression, name) {
     // Now we're in the IIFE and have the inner expression statement. We can check if it matches
     // a private Ivy call.
-    if (!ts.isCallExpression(expression)) {
+    const callExpr = innerExprStmt.expression;
+    if (!ts.isCallExpression(callExpr)) {
         return false;
     }
-    const propAccExpr = expression.expression;
+    const propAccExpr = callExpr.expression;
     if (!ts.isPropertyAccessExpression(propAccExpr)) {
         return false;
     }
-    if (propAccExpr.name.text != name) {
+    if (propAccExpr.name.text !== 'ɵsetClassMetadata') {
         return false;
     }
     return true;
@@ -305,7 +300,7 @@ function isIvyPrivateCallExpression(expression, name) {
 function pickDecorationNodesToRemove(exprStmt, ngMetadata, checker) {
     const expr = expect(exprStmt.expression, ts.SyntaxKind.BinaryExpression);
     const literal = expect(expr.right, ts.SyntaxKind.ArrayLiteralExpression);
-    if (!literal.elements.every(elem => ts.isObjectLiteralExpression(elem))) {
+    if (!literal.elements.every((elem) => elem.kind === ts.SyntaxKind.ObjectLiteralExpression)) {
         return [];
     }
     const elements = literal.elements;
@@ -362,23 +357,18 @@ function pickDecorateNodesToRemove(exprStmt, tslibImports, ngMetadata, checker) 
         }
         return true;
     });
-    if (ngDecoratorCalls.length === 0) {
-        return [];
-    }
-    const callCount = ngDecoratorCalls.length + metadataCalls.length + paramCalls.length;
+    ngDecoratorCalls.push(...metadataCalls, ...paramCalls);
     // If all decorators are metadata decorators then return the whole `Class = __decorate([...])'`
-    // statement so that it is removed in entirety.
-    // If not then only remove the Angular decorators.
-    // The metadata and param calls may be used by the non-Angular decorators.
-    return (elements.length === callCount) ? [exprStmt] : ngDecoratorCalls;
+    // statement so that it is removed in entirety
+    return (elements.length === ngDecoratorCalls.length) ? [exprStmt] : ngDecoratorCalls;
 }
 // Remove Angular decorators from`Clazz.propDecorators = [...];`, or expression itself if all
 // are removed.
 function pickPropDecorationNodesToRemove(exprStmt, ngMetadata, checker) {
     const expr = expect(exprStmt.expression, ts.SyntaxKind.BinaryExpression);
     const literal = expect(expr.right, ts.SyntaxKind.ObjectLiteralExpression);
-    if (!literal.properties.every(elem => ts.isPropertyAssignment(elem)
-        && ts.isArrayLiteralExpression(elem.initializer))) {
+    if (!literal.properties.every((elem) => elem.kind === ts.SyntaxKind.PropertyAssignment &&
+        elem.initializer.kind === ts.SyntaxKind.ArrayLiteralExpression)) {
         return [];
     }
     const assignments = literal.properties;
@@ -403,7 +393,8 @@ function pickPropDecorationNodesToRemove(exprStmt, ngMetadata, checker) {
     // If every node to be removed is a property assignment (full property's decorators) and
     // all properties are accounted for, remove the whole assignment. Otherwise, remove the
     // nodes which were marked as safe.
-    if (toRemove.length === assignments.length && toRemove.every((node) => ts.isPropertyAssignment(node))) {
+    if (toRemove.length === assignments.length &&
+        toRemove.every((node) => node.kind === ts.SyntaxKind.PropertyAssignment)) {
         return [exprStmt];
     }
     return toRemove;
