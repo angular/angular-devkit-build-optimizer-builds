@@ -43,6 +43,10 @@ function isKnownCoreFile(filePath) {
     return coreFilesRegex.test(filePath);
 }
 function isKnownSideEffectFree(filePath) {
+    // rxjs add imports contain intentional side effects
+    if (/[\\/]node_modules[\\/]rxjs[\\/]add[\\/]/.test(filePath)) {
+        return false;
+    }
     return ngFactories.some((s) => filePath.endsWith(s)) ||
         knownSideEffectFreeAngularModules.some((re) => re.test(filePath));
 }
