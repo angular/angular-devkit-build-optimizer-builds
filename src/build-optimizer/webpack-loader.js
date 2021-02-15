@@ -14,16 +14,10 @@ path.endsWith('.ts') ||
     path.endsWith('.ngstyle.js');
 function buildOptimizerLoader(content, previousSourceMap) {
     this.cacheable();
-    const callback = this.async();
-    if (!callback) {
-        throw new Error('Async loader support is required.');
-    }
     const skipBuildOptimizer = this._module && this._module.factoryMeta && this._module.factoryMeta.skipBuildOptimizer;
     if (!alwaysProcess(this.resourcePath) && skipBuildOptimizer) {
         // Skip loading processing this file with Build Optimizer if we determined in
         // BuildOptimizerWebpackPlugin that we shouldn't.
-        // Webpack typings for previousSourceMap are wrong, they are JSON objects and not strings.
-        // tslint:disable-next-line:no-any
         this.callback(null, content, previousSourceMap);
         return;
     }
@@ -37,7 +31,6 @@ function buildOptimizerLoader(content, previousSourceMap) {
         isSideEffectFree: this._module && this._module.factoryMeta && this._module.factoryMeta.sideEffectFree,
     });
     if (boOutput.emitSkipped || boOutput.content === null) {
-        // tslint:disable-next-line:no-any
         this.callback(null, content, previousSourceMap);
         return;
     }
@@ -49,8 +42,6 @@ function buildOptimizerLoader(content, previousSourceMap) {
         newContent = newContent.replace(/^\/\/# sourceMappingURL=[^\r\n]*/gm, '');
         if (previousSourceMap) {
             // Use http://sokra.github.io/source-map-visualization/ to validate sourcemaps make sense.
-            // The last argument is not yet in the typings
-            // tslint:disable-next-line: no-any
             newSourceMap = new webpack_sources_1.SourceMapSource(newContent, this.resourcePath, intermediateSourceMap, content, previousSourceMap, true).map();
         }
         else {
@@ -58,8 +49,6 @@ function buildOptimizerLoader(content, previousSourceMap) {
             newSourceMap = intermediateSourceMap;
         }
     }
-    // Webpack typings for previousSourceMap are wrong, they are JSON objects and not strings.
-    // tslint:disable-next-line:no-any
-    callback(null, newContent, newSourceMap);
+    this.callback(null, newContent, newSourceMap);
 }
 exports.default = buildOptimizerLoader;
