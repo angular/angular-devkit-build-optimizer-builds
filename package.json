@@ -1,6 +1,6 @@
 {
   "name": "@angular-devkit/build-optimizer",
-  "version": "0.1200.0-next.0+15.b179a70",
+  "version": "0.1200.0-next.0+12.e2d6df2",
   "description": "Angular Build Optimizer",
   "experimental": true,
   "main": "src/index.js",
@@ -14,14 +14,6 @@
     "tslib": "2.1.0",
     "typescript": "4.1.5",
     "webpack-sources": "2.2.0"
-  },
-  "peerDependencies": {
-    "webpack": "^4.0.0 || ^5.20.0"
-  },
-  "peerDependenciesMeta": {
-    "webpack": {
-      "optional": true
-    }
   },
   "keywords": [
     "angular",
