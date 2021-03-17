@@ -448,7 +448,8 @@ function findTslibImports(node) {
         if (ts.isImportDeclaration(child) &&
             child.moduleSpecifier &&
             ts.isStringLiteral(child.moduleSpecifier) &&
-            child.moduleSpecifier.text === 'tslib' && ((_a = child.importClause) === null || _a === void 0 ? void 0 : _a.namedBindings) &&
+            child.moduleSpecifier.text === 'tslib' &&
+            ((_a = child.importClause) === null || _a === void 0 ? void 0 : _a.namedBindings) &&
             ts.isNamedImports((_b = child.importClause) === null || _b === void 0 ? void 0 : _b.namedBindings)) {
             imports.push(child.importClause.namedBindings);
         }
