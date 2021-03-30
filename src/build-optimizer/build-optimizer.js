@@ -32,11 +32,6 @@ const knownSideEffectFreeAngularModules = [
     /[\\/]node_modules[\\/]@angular[\\/]cdk[\\/]/,
     /[\\/]node_modules[\\/]rxjs[\\/]/,
 ];
-// Factories created by AOT are known to have no side effects.
-const ngFactories = [
-    '.ngfactory.js',
-    '.ngstyle.js',
-];
 // Known locations for the source files of @angular/core.
 const coreFilesRegex = /[\\/]node_modules[\\/]@angular[\\/]core[\\/][f]?esm2015[\\/]/;
 function isKnownCoreFile(filePath) {
@@ -47,8 +42,7 @@ function isKnownSideEffectFree(filePath) {
     if (/[\\/]node_modules[\\/]rxjs[\\/]add[\\/]/.test(filePath)) {
         return false;
     }
-    return ngFactories.some((s) => filePath.endsWith(s)) ||
-        knownSideEffectFreeAngularModules.some((re) => re.test(filePath));
+    return knownSideEffectFreeAngularModules.some((re) => re.test(filePath));
 }
 function buildOptimizer(options) {
     const { inputFilePath } = options;

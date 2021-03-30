@@ -5,13 +5,7 @@ const webpack_sources_1 = require("webpack-sources");
 const loaderUtils = require('loader-utils');
 const build_optimizer_1 = require("./build-optimizer");
 exports.buildOptimizerLoaderPath = __filename;
-const alwaysProcess = (path) => 
-// Always process TS files.
-path.endsWith('.ts') ||
-    path.endsWith('.tsx') ||
-    // Always process factory files.
-    path.endsWith('.ngfactory.js') ||
-    path.endsWith('.ngstyle.js');
+const alwaysProcess = (path) => path.endsWith('.ts') || path.endsWith('.tsx');
 function buildOptimizerLoader(content, previousSourceMap) {
     this.cacheable();
     const skipBuildOptimizer = this._module && this._module.factoryMeta && this._module.factoryMeta.skipBuildOptimizer;
