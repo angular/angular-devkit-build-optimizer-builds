@@ -6,8 +6,8 @@ class BuildOptimizerWebpackPlugin {
         compiler.hooks.normalModuleFactory.tap('BuildOptimizerWebpackPlugin', nmf => {
             // tslint:disable-next-line: no-any
             nmf.hooks.module.tap('BuildOptimizerWebpackPlugin', (module, data) => {
-                const { descriptionFileData } = data.resourceResolveData;
-                if (descriptionFileData) {
+                var _a;
+                if ((_a = data.resourceResolveData) === null || _a === void 0 ? void 0 : _a.descriptionFileData) {
                     // Only TS packages should use Build Optimizer.
                     // Notes:
                     // - a TS package might not have defined typings but still use .d.ts files next to their
@@ -16,7 +16,7 @@ class BuildOptimizerWebpackPlugin {
                     // provide configuration options to the plugin to cover that case if there's demand.
                     // - a JS-only package that also happens to provides typings will also be flagged by this
                     // check. Not sure there's a good way to skip those.
-                    const skipBuildOptimizer = !descriptionFileData.typings;
+                    const skipBuildOptimizer = !data.resourceResolveData.descriptionFileData.typings;
                     module.factoryMeta = { ...module.factoryMeta, skipBuildOptimizer };
                 }
                 return module;
