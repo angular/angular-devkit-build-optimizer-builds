@@ -1,7 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.buildOptimizerLoaderPath = void 0;
-const webpack_1 = require("webpack");
+const webpack_sources_1 = require("webpack-sources");
+const loaderUtils = require('loader-utils');
 const build_optimizer_1 = require("./build-optimizer");
 exports.buildOptimizerLoaderPath = __filename;
 const alwaysProcess = (path) => path.endsWith('.ts') || path.endsWith('.tsx');
@@ -14,7 +15,7 @@ function buildOptimizerLoader(content, previousSourceMap) {
         this.callback(null, content, previousSourceMap);
         return;
     }
-    const options = (this.getOptions() || {});
+    const options = loaderUtils.getOptions(this) || {};
     const boOutput = build_optimizer_1.buildOptimizer({
         content,
         originalFilePath: this.resourcePath,
@@ -35,7 +36,7 @@ function buildOptimizerLoader(content, previousSourceMap) {
         newContent = newContent.replace(/^\/\/# sourceMappingURL=[^\r\n]*/gm, '');
         if (previousSourceMap) {
             // Use http://sokra.github.io/source-map-visualization/ to validate sourcemaps make sense.
-            newSourceMap = new webpack_1.sources.SourceMapSource(newContent, this.resourcePath, intermediateSourceMap, content, previousSourceMap, true).map();
+            newSourceMap = new webpack_sources_1.SourceMapSource(newContent, this.resourcePath, intermediateSourceMap, content, previousSourceMap, true).map();
         }
         else {
             // Otherwise just return our generated sourcemap.
