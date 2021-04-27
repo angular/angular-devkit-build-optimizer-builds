@@ -1,4 +1,11 @@
 "use strict";
+/**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.io/license
+ */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getScrubFileTransformerForCore = exports.getScrubFileTransformer = exports.getWrapEnumsTransformer = exports.getPrefixFunctionsTransformer = exports.getPrefixClassesTransformer = exports.transformJavascript = exports.buildOptimizer = exports.BuildOptimizerWebpackPlugin = exports.buildOptimizerLoaderPath = exports.buildOptimizerLoader = void 0;
 const scrub_file_1 = require("./transforms/scrub-file");

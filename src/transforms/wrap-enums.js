@@ -1,13 +1,13 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getWrapEnumsTransformer = void 0;
 /**
  * @license
- * Copyright Google Inc. All Rights Reserved.
+ * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getWrapEnumsTransformer = void 0;
 const ts = require("typescript");
 const ast_utils_1 = require("../helpers/ast-utils");
 function isBlockLike(node) {
