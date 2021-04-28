@@ -27,7 +27,7 @@ if (!inputFile.match(tsOrJsRegExp)) {
     throw new Error(`Input file must be .js or .ts.`);
 }
 // Use provided output file, or add the .bo suffix before the extension.
-const outputFile = process.argv[3] || inputFile.replace(tsOrJsRegExp, subStr => `.bo${subStr}`);
+const outputFile = process.argv[3] || inputFile.replace(tsOrJsRegExp, (subStr) => `.bo${subStr}`);
 const boOutput = build_optimizer_1.buildOptimizer({
     inputFilePath: path_1.join(currentDir, inputFile),
     outputFilePath: path_1.join(currentDir, outputFile),

@@ -11,7 +11,7 @@ exports.transformJavascript = void 0;
 const ts = require("typescript");
 function validateDiagnostics(diagnostics, strict) {
     // Print error diagnostics.
-    const hasError = diagnostics.some(diag => diag.category === ts.DiagnosticCategory.Error);
+    const hasError = diagnostics.some((diag) => diag.category === ts.DiagnosticCategory.Error);
     if (hasError) {
         // Throw only if we're in strict mode, otherwise return original content.
         if (strict) {
@@ -33,7 +33,7 @@ function validateDiagnostics(diagnostics, strict) {
     return true;
 }
 function transformJavascript(options) {
-    const { content, getTransforms, emitSourceMap, inputFilePath, outputFilePath, strict, } = options;
+    const { content, getTransforms, emitSourceMap, inputFilePath, outputFilePath, strict } = options;
     // Bail if there's no transform to do.
     if (getTransforms.length === 0) {
         return {
