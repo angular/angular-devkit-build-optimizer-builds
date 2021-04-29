@@ -10,7 +10,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BuildOptimizerWebpackPlugin = void 0;
 class BuildOptimizerWebpackPlugin {
     apply(compiler) {
-        compiler.hooks.normalModuleFactory.tap('BuildOptimizerWebpackPlugin', nmf => {
+        compiler.hooks.normalModuleFactory.tap('BuildOptimizerWebpackPlugin', (nmf) => {
             // tslint:disable-next-line: no-any
             nmf.hooks.module.tap('BuildOptimizerWebpackPlugin', (module, data) => {
                 var _a;

@@ -210,7 +210,7 @@ function isAngularDecoratorExpression(exprStmt, ngMetadata, tslibImports, checke
     if (decorateArray.elements.length === 0 || !ts.isCallExpression(decorateArray.elements[0])) {
         return false;
     }
-    return decorateArray.elements.some(decoratorCall => {
+    return decorateArray.elements.some((decoratorCall) => {
         if (!ts.isCallExpression(decoratorCall) || !ts.isIdentifier(decoratorCall.expression)) {
             return false;
         }
@@ -235,8 +235,8 @@ function isCtorParamsAssignmentExpression(exprStmt) {
         return false;
     }
     const expr = exprStmt.expression;
-    if (expr.right.kind !== ts.SyntaxKind.FunctionExpression
-        && expr.right.kind !== ts.SyntaxKind.ArrowFunction) {
+    if (expr.right.kind !== ts.SyntaxKind.FunctionExpression &&
+        expr.right.kind !== ts.SyntaxKind.ArrowFunction) {
         return false;
     }
     return true;
@@ -305,12 +305,12 @@ function isIvyPrivateCallExpression(expression, name) {
 function pickDecorationNodesToRemove(exprStmt, ngMetadata, checker) {
     const expr = expect(exprStmt.expression, ts.SyntaxKind.BinaryExpression);
     const literal = expect(expr.right, ts.SyntaxKind.ArrayLiteralExpression);
-    if (!literal.elements.every(elem => ts.isObjectLiteralExpression(elem))) {
+    if (!literal.elements.every((elem) => ts.isObjectLiteralExpression(elem))) {
         return [];
     }
     const elements = literal.elements;
     const ngDecorators = elements.filter((elem) => isAngularDecorator(elem, ngMetadata, checker));
-    return (elements.length > ngDecorators.length) ? ngDecorators : [exprStmt];
+    return elements.length > ngDecorators.length ? ngDecorators : [exprStmt];
 }
 // Remove Angular decorators from `Clazz = __decorate([...], Clazz)`, or expression itself if all
 // are removed.
@@ -370,15 +370,14 @@ function pickDecorateNodesToRemove(exprStmt, tslibImports, ngMetadata, checker) 
     // statement so that it is removed in entirety.
     // If not then only remove the Angular decorators.
     // The metadata and param calls may be used by the non-Angular decorators.
-    return (elements.length === callCount) ? [exprStmt] : ngDecoratorCalls;
+    return elements.length === callCount ? [exprStmt] : ngDecoratorCalls;
 }
 // Remove Angular decorators from`Clazz.propDecorators = [...];`, or expression itself if all
 // are removed.
 function pickPropDecorationNodesToRemove(exprStmt, ngMetadata, checker) {
     const expr = expect(exprStmt.expression, ts.SyntaxKind.BinaryExpression);
     const literal = expect(expr.right, ts.SyntaxKind.ObjectLiteralExpression);
-    if (!literal.properties.every(elem => ts.isPropertyAssignment(elem)
-        && ts.isArrayLiteralExpression(elem.initializer))) {
+    if (!literal.properties.every((elem) => ts.isPropertyAssignment(elem) && ts.isArrayLiteralExpression(elem.initializer))) {
         return [];
     }
     const assignments = literal.properties;
@@ -403,7 +402,8 @@ function pickPropDecorationNodesToRemove(exprStmt, ngMetadata, checker) {
     // If every node to be removed is a property assignment (full property's decorators) and
     // all properties are accounted for, remove the whole assignment. Otherwise, remove the
     // nodes which were marked as safe.
-    if (toRemove.length === assignments.length && toRemove.every((node) => ts.isPropertyAssignment(node))) {
+    if (toRemove.length === assignments.length &&
+        toRemove.every((node) => ts.isPropertyAssignment(node))) {
         return [exprStmt];
     }
     return toRemove;
@@ -436,14 +436,12 @@ function identifierIsMetadata(id, metadata, checker) {
     if (!symbol || !symbol.declarations || !symbol.declarations.length) {
         return false;
     }
-    return symbol
-        .declarations
-        .some((spec) => metadata.includes(spec));
+    return symbol.declarations.some((spec) => metadata.includes(spec));
 }
 // Find all named imports for `tslib`.
 function findTslibImports(node) {
     const imports = [];
-    ts.forEachChild(node, child => {
+    ts.forEachChild(node, (child) => {
         var _a, _b;
         if (ts.isImportDeclaration(child) &&
             child.moduleSpecifier &&
@@ -467,7 +465,7 @@ function isTslibHelper(callExpr, helper, tslibImports, checker) {
         return false;
     }
     for (const dec of symbol.declarations) {
-        if (ts.isImportSpecifier(dec) && tslibImports.some(name => name.elements.includes(dec))) {
+        if (ts.isImportSpecifier(dec) && tslibImports.some((name) => name.elements.includes(dec))) {
             return true;
         }
         // Handle inline helpers `var __decorate = (this...`

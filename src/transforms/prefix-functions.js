@@ -39,10 +39,10 @@ function findTopLevelFunctions(parentNode) {
         // need to mark function calls inside them as pure.
         // Class static initializers in ES2015 are an exception we don't cover. They would need similar
         // processing as enums to prevent property setting from causing the class to be retained.
-        if (ts.isFunctionLike(node)
-            || ts.isClassLike(node)
-            || ts.isArrowFunction(node)
-            || ts.isMethodDeclaration(node)) {
+        if (ts.isFunctionLike(node) ||
+            ts.isClassLike(node) ||
+            ts.isArrowFunction(node) ||
+            ts.isMethodDeclaration(node)) {
             return;
         }
         let noPureComment = !ast_utils_1.hasPureComment(node);
@@ -54,8 +54,8 @@ function findTopLevelFunctions(parentNode) {
         if (!innerNode) {
             return;
         }
-        if ((ts.isFunctionExpression(innerNode) || ts.isArrowFunction(innerNode))
-            && ts.isParenthesizedExpression(node)) {
+        if ((ts.isFunctionExpression(innerNode) || ts.isArrowFunction(innerNode)) &&
+            ts.isParenthesizedExpression(node)) {
             // pure functions can be wrapped in parentizes
             // we should not add pure comments to this sort of syntax.
             // example var foo = (() => x)
