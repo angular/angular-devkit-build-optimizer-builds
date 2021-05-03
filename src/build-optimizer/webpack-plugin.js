@@ -11,7 +11,6 @@ exports.BuildOptimizerWebpackPlugin = void 0;
 class BuildOptimizerWebpackPlugin {
     apply(compiler) {
         compiler.hooks.normalModuleFactory.tap('BuildOptimizerWebpackPlugin', (nmf) => {
-            // tslint:disable-next-line: no-any
             nmf.hooks.module.tap('BuildOptimizerWebpackPlugin', (module, data) => {
                 var _a;
                 if ((_a = data.resourceResolveData) === null || _a === void 0 ? void 0 : _a.descriptionFileData) {
