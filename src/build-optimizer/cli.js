@@ -11,7 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = require("fs");
 const path_1 = require("path");
 const build_optimizer_1 = require("./build-optimizer");
-// tslint:disable: no-console
+/* eslint-disable no-console */
 if (process.argv.length < 3 || process.argv.length > 4) {
     throw new Error(`
     build-optimizer should be called with either one or two arguments:
