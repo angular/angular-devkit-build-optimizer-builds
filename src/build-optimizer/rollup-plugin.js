@@ -6,12 +6,12 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
+Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * @fileoverview This adapts the buildOptimizer to run over each file as it is
  * processed by Rollup. We must do this since buildOptimizer expects to see the
  * ESModules in the input sources, and therefore cannot run on the rollup output
  */
-Object.defineProperty(exports, "__esModule", { value: true });
 const path = require("path");
 const build_optimizer_1 = require("./build-optimizer");
 const DEBUG = false;
