@@ -43,7 +43,7 @@ function testPrefixClasses(content) {
             /\s*function \(\) {/,
             newLine,
             multiLineComment,
-            /function (?:\S+)\([^\)]*\) \{/,
+            /function (?:\S+)\([^)]*\) \{/,
             newLine,
         ],
         [
