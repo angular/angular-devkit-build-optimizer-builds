@@ -22,7 +22,7 @@ function buildOptimizerLoader(content, previousSourceMap) {
         return;
     }
     const options = (this.getOptions() || {});
-    const boOutput = build_optimizer_1.buildOptimizer({
+    const boOutput = (0, build_optimizer_1.buildOptimizer)({
         content,
         originalFilePath: this.resourcePath,
         inputFilePath: this.resourcePath,

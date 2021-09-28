@@ -112,7 +112,7 @@ function findAngularMetadata(node, isAngularCoreFile) {
         if (child.kind === ts.SyntaxKind.ImportDeclaration) {
             const importDecl = child;
             if (isAngularCoreImport(importDecl, isAngularCoreFile)) {
-                specs.push(...ast_utils_1.collectDeepNodes(importDecl, ts.SyntaxKind.ImportSpecifier));
+                specs.push(...(0, ast_utils_1.collectDeepNodes)(importDecl, ts.SyntaxKind.ImportSpecifier));
             }
         }
     });

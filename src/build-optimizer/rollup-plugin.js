@@ -47,7 +47,7 @@ function optimizer(options) {
                 options.sideEffectFreeModules.some((m) => normalizedId.indexOf(m) >= 0);
             const isAngularCoreFile = options.angularCoreModules &&
                 options.angularCoreModules.some((m) => normalizedId.indexOf(m) >= 0);
-            const { content: code, sourceMap: map } = build_optimizer_1.buildOptimizer({
+            const { content: code, sourceMap: map } = (0, build_optimizer_1.buildOptimizer)({
                 content,
                 inputFilePath: id,
                 emitSourceMap: true,

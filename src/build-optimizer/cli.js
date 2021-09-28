@@ -28,17 +28,17 @@ if (!inputFile.match(tsOrJsRegExp)) {
 }
 // Use provided output file, or add the .bo suffix before the extension.
 const outputFile = process.argv[3] || inputFile.replace(tsOrJsRegExp, (subStr) => `.bo${subStr}`);
-const boOutput = build_optimizer_1.buildOptimizer({
-    inputFilePath: path_1.join(currentDir, inputFile),
-    outputFilePath: path_1.join(currentDir, outputFile),
+const boOutput = (0, build_optimizer_1.buildOptimizer)({
+    inputFilePath: (0, path_1.join)(currentDir, inputFile),
+    outputFilePath: (0, path_1.join)(currentDir, outputFile),
     emitSourceMap: true,
 });
 if (boOutput.emitSkipped) {
     console.log('Nothing to emit.');
 }
 else {
-    fs_1.writeFileSync(path_1.join(currentDir, outputFile), boOutput.content);
-    fs_1.writeFileSync(path_1.join(currentDir, `${outputFile}.map`), JSON.stringify(boOutput.sourceMap));
+    (0, fs_1.writeFileSync)((0, path_1.join)(currentDir, outputFile), boOutput.content);
+    (0, fs_1.writeFileSync)((0, path_1.join)(currentDir, `${outputFile}.map`), JSON.stringify(boOutput.sourceMap));
     console.log('Emitted:');
     console.log(`  ${outputFile}`);
     console.log(`  ${outputFile}.map`);

@@ -36,7 +36,7 @@ function getPrefixFunctionsTransformer() {
             const visitor = (node) => {
                 // Add pure function comment to top level functions.
                 if (topLevelFunctions.has(node)) {
-                    const newNode = ast_utils_1.addPureComment(node);
+                    const newNode = (0, ast_utils_1.addPureComment)(node);
                     // Replace node with modified one.
                     return ts.visitEachChild(newNode, visitor, context);
                 }
@@ -64,11 +64,11 @@ function findTopLevelFunctions(parentNode) {
             ts.isMethodDeclaration(node)) {
             return;
         }
-        let noPureComment = !ast_utils_1.hasPureComment(node);
+        let noPureComment = !(0, ast_utils_1.hasPureComment)(node);
         let innerNode = node;
         while (innerNode && ts.isParenthesizedExpression(innerNode)) {
             innerNode = innerNode.expression;
-            noPureComment = noPureComment && !ast_utils_1.hasPureComment(innerNode);
+            noPureComment = noPureComment && !(0, ast_utils_1.hasPureComment)(innerNode);
         }
         if (!innerNode) {
             return;
@@ -86,7 +86,7 @@ function findTopLevelFunctions(parentNode) {
             }
             else if (ts.isCallExpression(innerNode)) {
                 let expression = innerNode.expression;
-                if (ts.isIdentifier(expression) && ast_utils_1.getCleanHelperName(expression.text)) {
+                if (ts.isIdentifier(expression) && (0, ast_utils_1.getCleanHelperName)(expression.text)) {
                     return;
                 }
                 while (expression && ts.isParenthesizedExpression(expression)) {
