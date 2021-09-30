@@ -72,7 +72,7 @@ function getPrefixClassesTransformer() {
                     const varInitializer = varDecl.initializer;
                     // Update node with the pure comment before the variable declaration initializer.
                     const newNode = ts.updateVariableStatement(node, node.modifiers, ts.updateVariableDeclarationList(node.declarationList, [
-                        ts.updateVariableDeclaration(varDecl, varDecl.name, varDecl.type, ast_utils_1.addPureComment(varInitializer)),
+                        ts.updateVariableDeclaration(varDecl, varDecl.name, varDecl.type, (0, ast_utils_1.addPureComment)(varInitializer)),
                     ]));
                     // Replace node with modified one.
                     return ts.visitEachChild(newNode, visitor, context);

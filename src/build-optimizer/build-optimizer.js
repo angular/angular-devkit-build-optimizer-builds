@@ -54,7 +54,7 @@ function buildOptimizer(options) {
         throw new Error('Either filePath or content must be specified in options.');
     }
     if (content === undefined) {
-        content = fs_1.readFileSync(inputFilePath, 'UTF-8');
+        content = (0, fs_1.readFileSync)(inputFilePath, 'UTF-8');
     }
     if (!content) {
         return {
@@ -79,13 +79,13 @@ function buildOptimizer(options) {
         prefix_functions_1.getPrefixFunctionsTransformer);
         typeCheck = true;
     }
-    else if (prefix_classes_1.testPrefixClasses(content)) {
+    else if ((0, prefix_classes_1.testPrefixClasses)(content)) {
         // This is only relevant if prefix functions is not used since prefix functions will prefix IIFE wrapped classes.
         getTransforms.unshift(prefix_classes_1.getPrefixClassesTransformer);
     }
-    if (scrub_file_1.testScrubFile(content)) {
+    if ((0, scrub_file_1.testScrubFile)(content)) {
         // Always test as these require the type checker
-        getTransforms.push(scrub_file_1.createScrubFileTransformerFactory(isAngularCoreFile));
+        getTransforms.push((0, scrub_file_1.createScrubFileTransformerFactory)(isAngularCoreFile));
         typeCheck = true;
     }
     getTransforms.push(wrap_enums_1.getWrapEnumsTransformer);
@@ -98,6 +98,6 @@ function buildOptimizer(options) {
         getTransforms,
         typeCheck,
     };
-    return transform_javascript_1.transformJavascript(transformJavascriptOpts);
+    return (0, transform_javascript_1.transformJavascript)(transformJavascriptOpts);
 }
 exports.buildOptimizer = buildOptimizer;

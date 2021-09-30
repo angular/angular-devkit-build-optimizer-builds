@@ -28,10 +28,10 @@ Object.defineProperty(exports, "getPrefixFunctionsTransformer", { enumerable: tr
 var wrap_enums_1 = require("./transforms/wrap-enums");
 Object.defineProperty(exports, "getWrapEnumsTransformer", { enumerable: true, get: function () { return wrap_enums_1.getWrapEnumsTransformer; } });
 function getScrubFileTransformer(program) {
-    return scrub_file_1.createScrubFileTransformerFactory(false)(program);
+    return (0, scrub_file_1.createScrubFileTransformerFactory)(false)(program);
 }
 exports.getScrubFileTransformer = getScrubFileTransformer;
 function getScrubFileTransformerForCore(program) {
-    return scrub_file_1.createScrubFileTransformerFactory(true)(program);
+    return (0, scrub_file_1.createScrubFileTransformerFactory)(true)(program);
 }
 exports.getScrubFileTransformerForCore = getScrubFileTransformerForCore;

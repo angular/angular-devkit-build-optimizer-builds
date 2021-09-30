@@ -303,7 +303,7 @@ function updateEnumIife(nodeFactory, hostNode, iife, exportAssignment) {
         arg = nodeFactory.createBinaryExpression(exportAssignment, ts.SyntaxKind.BarBarToken, arg);
     }
     const updatedIife = nodeFactory.updateCallExpression(iife, nodeFactory.updateParenthesizedExpression(iife.expression, updatedFunction), iife.typeArguments, [arg]);
-    let value = ast_utils_1.addPureComment(updatedIife);
+    let value = (0, ast_utils_1.addPureComment)(updatedIife);
     if (exportAssignment) {
         value = nodeFactory.createBinaryExpression(exportAssignment, ts.SyntaxKind.FirstAssignment, updatedIife);
     }
@@ -315,7 +315,7 @@ function createWrappedClass(nodeFactory, hostNode, statements) {
     if (ts.isClassDeclaration(hostNode)) {
         updatedStatements[0] = nodeFactory.createClassDeclaration(hostNode.decorators, undefined, hostNode.name, hostNode.typeParameters, hostNode.heritageClauses, hostNode.members);
     }
-    const pureIife = ast_utils_1.addPureComment(nodeFactory.createImmediatelyInvokedArrowFunction([
+    const pureIife = (0, ast_utils_1.addPureComment)(nodeFactory.createImmediatelyInvokedArrowFunction([
         ...updatedStatements,
         nodeFactory.createReturnStatement(nodeFactory.createIdentifier(name)),
     ]));
