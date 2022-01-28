@@ -1,6 +1,6 @@
 {
   "name": "@angular-devkit/build-optimizer",
-  "version": "0.1400.0-next.0",
+  "version": "0.1302.0-next.2+34.sha-4cd912d",
   "description": "Angular Build Optimizer",
   "experimental": true,
   "main": "src/index.js",
@@ -22,11 +22,11 @@
     }
   },
   "keywords": [
-    "angular",
     "Angular CLI",
+    "Angular DevKit",
+    "angular",
     "devkit",
-    "sdk",
-    "Angular DevKit"
+    "sdk"
   ],
   "repository": {
     "type": "git",
