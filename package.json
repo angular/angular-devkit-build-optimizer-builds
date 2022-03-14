@@ -1,6 +1,6 @@
 {
   "name": "@angular-devkit/build-optimizer",
-  "version": "0.1302.6+1.sha-0b55bab",
+  "version": "0.1302.6+3.sha-fd55a00",
   "description": "Angular Build Optimizer",
   "experimental": true,
   "private": true,
@@ -12,7 +12,7 @@
   "dependencies": {
     "source-map": "0.7.3",
     "tslib": "2.3.1",
-    "typescript": "4.5.5"
+    "typescript": "4.6.2"
   },
   "peerDependencies": {
     "webpack": "^5.30.0"
