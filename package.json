@@ -1,6 +1,6 @@
 {
   "name": "@angular-devkit/build-optimizer",
-  "version": "0.1303.0+4.sha-ff0430d",
+  "version": "0.1303.0+6.sha-3814df5",
   "description": "Angular Build Optimizer",
   "experimental": true,
   "private": true,
